@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="621.0" prefWidth="869.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.jc_assign01.MainController">
+   <children>
+      <TabPane fx:id="tabPane" prefHeight="621.0" prefWidth="869.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab fx:id="menu" text="Menu">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="597.0" prefWidth="869.0">
+                     <children>
+                        <ImageView fx:id="initImage" fitHeight="399.0" fitWidth="512.0" layoutX="14.0" layoutY="41.0" pickOnBounds="true" preserveRatio="true" />
+                        <ListView fx:id="imageInfo" layoutX="14.0" layoutY="460.0" prefHeight="109.0" prefWidth="411.0" />
+                        <MenuBar fx:id="menuBar" layoutY="2.0" prefHeight="25.0" prefWidth="869.0">
+                          <menus>
+                            <Menu fx:id="file" mnemonicParsing="false" text="File">
+                              <items>
+                                <MenuItem fx:id="openFile" mnemonicParsing="false" onAction="#fileChooser" text="Open File" />
+                                    <MenuItem fx:id="clear" mnemonicParsing="false" onAction="#resetImageView" text="Clear Image" />
+                              </items>
+                            </Menu>
+                          </menus>
+                        </MenuBar>
+                        <CheckBox fx:id="blackAndWhite" layoutX="537.0" layoutY="87.0" mnemonicParsing="false" onAction="#convertImage" text="Black and White" />
+                        <Slider fx:id="luminanceSlider" layoutX="494.0" layoutY="289.0" max="1.0" onMouseDragged="#getLuminanceValue" prefHeight="14.0" prefWidth="285.0" showTickLabels="true" showTickMarks="true" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>
