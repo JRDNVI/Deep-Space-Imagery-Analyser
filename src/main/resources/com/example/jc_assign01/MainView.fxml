@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Menu?>
@@ -11,7 +12,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="621.0" prefWidth="869.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.jc_assign01.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="621.0" prefWidth="869.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.jc_assign01.MainController">
    <children>
       <TabPane fx:id="tabPane" prefHeight="621.0" prefWidth="869.0" side="BOTTOM" tabClosingPolicy="UNAVAILABLE">
         <tabs>
@@ -33,6 +34,7 @@
                         </MenuBar>
                         <CheckBox fx:id="blackAndWhite" layoutX="537.0" layoutY="87.0" mnemonicParsing="false" onAction="#convertImage" text="Black and White" />
                         <Slider fx:id="luminanceSlider" layoutX="494.0" layoutY="289.0" max="1.0" onMouseDragged="#getLuminanceValue" prefHeight="14.0" prefWidth="285.0" showTickLabels="true" showTickMarks="true" />
+                        <Button fx:id="printArr" layoutX="571.0" layoutY="502.0" mnemonicParsing="false" onAction="#printArray" text="print" />
                      </children>
                   </AnchorPane>
             </content>
