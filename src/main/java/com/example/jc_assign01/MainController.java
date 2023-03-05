@@ -161,7 +161,7 @@ public class MainController {
                     for (int pixel : pixelSet) {
                         imageArray[pixel] = -1;
                     }
-                    //disjointSets.remove(key);
+                    disjointSets.remove(key);
 
                 }
             }
