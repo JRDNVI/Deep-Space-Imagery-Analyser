@@ -78,6 +78,10 @@ public class MainController {
         a[find(a, q)] = find(a, p); //The root of q is made reference the root of p
     }
 
+    //1). The image is converted to black and white using a luminance value that is calculated on every pixel, if the value is <
+    //    the user set value, the pixel will be set to black. An array is created by multiplying 512 x 512. This will create the
+    //    same number of index's in the array as the amount of pixels in the image. Then if the brightness of the pixel is 0.0 (Black)
+    //    the value at the index the pixel is set to -1. else the value is set to its own index. UnionPixels is then called.
     public void convertImage() {
         if (changeImage.isSelected()) {
             PixelReader pixelReader = image.getPixelReader();
@@ -110,6 +114,7 @@ public class MainController {
     }
 
 
+    // 2).
     public void unionPixels() {
         int width = (int) image.getWidth();
         disjointSets.clear();
