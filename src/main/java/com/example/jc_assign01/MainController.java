@@ -1,13 +1,13 @@
 package com.example.jc_assign01;
 
-import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.*;
 
 public class MainController {
 
@@ -21,6 +21,7 @@ public class MainController {
     public ImageView initImage;
     public ListView<Object> imageInfo = new ListView<>();
     public CheckBox blackAndWhite;
+
     public Slider luminanceSlider;
 
     public Image image;
@@ -28,7 +29,10 @@ public class MainController {
     public Button printArr;
 
     public int[] imageArray;
-    public ArrayList<Integer> sets = new ArrayList<>();
+    public Hashtable<Integer, List<Integer>> disjointSets = new Hashtable<Integer, List<Integer>>();
+    public ArrayList<Integer> roots = new ArrayList<>();
+    public Text numOfPlants;
+
 
     public void fileChooser() {
         FileChooser fileChooser = new FileChooser();
@@ -50,23 +54,14 @@ public class MainController {
         luminanceValue = luminanceSlider.getValue();
     }
 
+
     public static int find(int[] array, int index) {
         if (array[index] == -1) return -1;
-        return array[index] == index ? index : find(array, array[index]);
+        return array[index] == index ? index : (array[index] = find(array, array[index]));
     }
 
-    public static void unionBySize(int[] array, int p, int q) {
-        int rootp = find(array, p);
-        int rootq = find(array, q);
-
-        int biggerRoot = array[rootp] < array[rootq] ? rootp : rootq;
-        int smallerRoot = biggerRoot == rootp ? rootq : rootp;
-        int smallSize = array[smallerRoot];
-
-        array[smallerRoot] = biggerRoot;
-        array[biggerRoot] += smallSize;
-        //Value of merged root recalculated as the (negative)
-        //total number of elements in the merged set
+    public static void union(int[] a, int p, int q) {
+        a[find(a, q)] = find(a, p); //The root of q is made reference the root of p
     }
 
     public void convertImage() {
@@ -79,13 +74,12 @@ public class MainController {
 
             imageArray = new int[width * height];
 
-
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     Color color = pixelReader.getColor(x, y);
                     double luminance = 0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue();
                     double brightness = (luminance < luminanceValue) ? 0.0 : 1.0;
-                    if (brightness == 0.0) {
+                    if (brightness == 0) {
                         imageArray[y * width + x] = -1;
                     } else {
                         imageArray[y * width + x] = y * width + x;
@@ -101,32 +95,86 @@ public class MainController {
         unionPixels();
     }
 
+
     public void unionPixels() {
         int width = (int) image.getWidth();
-        int height = (int) image.getHeight();
+        disjointSets.clear();
 
         int i = 0;
-        while (i < width * height - 1) {
-            if (imageArray[i] != -1 && imageArray[i + 1] != -1) {
-                //imageArray[i +1] = imageArray[i];
-                unionBySize(imageArray, imageArray[i], imageArray[i + 1]);
-                if(imageArray[i] != -1 && imageArray[i + 512] != -1) {
-                    unionBySize(imageArray, imageArray[i], imageArray[i + 512]);
-                    //imageArray[i + 512] = imageArray[i];
-                }
-                if(imageArray[i] != -1 && imageArray[i + 511] != -1) {
-                    unionBySize(imageArray, imageArray[i], imageArray[i + 512]);
-                    //imageArray[i + 511] = imageArray[i];
-                }
-//                unionBySize(imageArray, imageArray[i], imageArray[i + 1]);
+        while (i < imageArray.length - 1) {
+            if (imageArray[i] != -1 && i % width != 0 && imageArray[i + 1] != -1) {
+                union(imageArray, i, i + 1);
+            }
+            if (imageArray[i] != -1 && i / width != 511 && imageArray[i + width] != -1) {
+                union(imageArray, i, i + width);
             }
             i++;
         }
+
     }
 
-        public void printArray () {
-            for (int i = 0; i < imageArray.length; i++) {
-                System.out.print(find(imageArray, i) + ((i + 1) % image.getWidth() == 0 ? "\n" : " "));
+    public void createDisjointSets() {
+        PixelReader pixelReader = image.getPixelReader();
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+        WritableImage writableImage = new WritableImage(width, height);
+        PixelWriter pixelWriter = writableImage.getPixelWriter();
+        // Iterate through each pixel in the image array
+        for (int i = 0; i < imageArray.length; i++) {
+            // Find the root of the current pixel using the 'find' method
+            int root = find(imageArray, i);
+            // If a root is found, add the pixel to the list of pixels associated with that root
+            if (root != -1) {
+                // If the root is not already in the 'disjointSets' map, add it with an empty list
+                if (!disjointSets.containsKey(root)) {
+                    disjointSets.put(root, new ArrayList<Integer>());
+                    roots.add(root);
+                }
+                // Add the current pixel to the list of pixels associated with the root
+                disjointSets.get(root).add(i);
             }
         }
+
+        Enumeration<Integer> node = disjointSets.keys();
+        while (node.hasMoreElements()) {
+            int key = node.nextElement();
+            int setSize = disjointSets.get(key).size();
+            if (setSize < 7) {
+                for (int pixel : disjointSets.get(key)) {
+                    imageArray[pixel] = -1;
+                    int x = pixel % width;
+                    int y = pixel / width;
+                    Color newColor = Color.hsb(0, 0, 0.0);
+                    pixelWriter.setColor(x, y, newColor);
+
+                }
+            }
+        }
+        initImage.setImage(writableImage);
+
+
+        //imageArray[disjointSets.get(key).get(0)] = -1;
+        // Print the resulting disjoint sets
+        // System.out.println(disjointSets);
+        // System.out.println(roots.toString());
+        numOfPlants.setText(String.valueOf((disjointSets.size())));
+
+        // colourPlants();
     }
+
+    public void colourPlants() {
+        int height = (int) image.getHeight();
+        int width = (int) image.getWidth();
+
+
+        List<Integer> temp = disjointSets.get(find(imageArray, 34327));
+
+    }
+
+    public void printArray() {
+        createDisjointSets();
+        for (int i = 0; i < imageArray.length; i++) {
+            System.out.print(find(imageArray, i) + ((i + 1) % image.getWidth() == 0 ? "\n" : " "));
+        }
+    }
+}
