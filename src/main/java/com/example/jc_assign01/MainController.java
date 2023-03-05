@@ -1,5 +1,6 @@
 package com.example.jc_assign01;
 
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.scene.paint.Color;
@@ -18,21 +19,29 @@ public class MainController {
     public Menu file;
     public MenuItem openFile;
     public MenuItem clear;
+    public Menu settings;
+    public MenuItem reduceNoise;
+    public MenuItem printArray;
+    public MenuItem colourSets;
     public ImageView initImage;
     public ListView<Object> imageInfo = new ListView<>();
-    public CheckBox blackAndWhite;
+    public CheckMenuItem changeImage;
 
     public Slider luminanceSlider;
+    public Slider noiseReductionValue;
 
     public Image image;
     public double luminanceValue;
+    public int noiseValue;
     public Button printArr;
+    public Button resetNoise;
 
     public int[] imageArray;
     public Hashtable<Integer, List<Integer>> disjointSets = new Hashtable<Integer, List<Integer>>();
     public ArrayList<Integer> roots = new ArrayList<>();
     public Text numOfPlants;
 
+    Tooltip tooltip = new Tooltip();
 
     public void fileChooser() {
         FileChooser fileChooser = new FileChooser();
@@ -43,6 +52,7 @@ public class MainController {
         image = new Image(file.toURI().toString(), 512, 512, false, false);
         initImage.setImage(image);
         imageInfo.getItems().addAll(fileName, fileSize, filePath);
+        Tooltip.install(initImage, tooltip);
     }
 
     public void resetImageView() {
@@ -52,6 +62,10 @@ public class MainController {
 
     public void getLuminanceValue() {
         luminanceValue = luminanceSlider.getValue();
+    }
+
+    public void getNoiseValue() {
+        noiseValue = (int) noiseReductionValue.getValue();
     }
 
 
@@ -65,7 +79,7 @@ public class MainController {
     }
 
     public void convertImage() {
-        if (blackAndWhite.isSelected()) {
+        if (changeImage.isSelected()) {
             PixelReader pixelReader = image.getPixelReader();
             int width = (int) image.getWidth();
             int height = (int) image.getHeight();
@@ -110,15 +124,10 @@ public class MainController {
             }
             i++;
         }
-
+        createDisjointSets();
     }
 
     public void createDisjointSets() {
-        PixelReader pixelReader = image.getPixelReader();
-        int width = (int) image.getWidth();
-        int height = (int) image.getHeight();
-        WritableImage writableImage = new WritableImage(width, height);
-        PixelWriter pixelWriter = writableImage.getPixelWriter();
         // Iterate through each pixel in the image array
         for (int i = 0; i < imageArray.length; i++) {
             // Find the root of the current pixel using the 'find' method
@@ -134,47 +143,83 @@ public class MainController {
                 disjointSets.get(root).add(i);
             }
         }
+    }
 
-        Enumeration<Integer> node = disjointSets.keys();
-        while (node.hasMoreElements()) {
-            int key = node.nextElement();
-            int setSize = disjointSets.get(key).size();
-            if (setSize < 7) {
-                for (int pixel : disjointSets.get(key)) {
-                    imageArray[pixel] = -1;
-                    int x = pixel % width;
-                    int y = pixel / width;
-                    Color newColor = Color.hsb(0, 0, 0.0);
-                    pixelWriter.setColor(x, y, newColor);
+    public void removeNoiseAndKeys() {
+        if (changeImage.isSelected()) {
+            int width = (int) image.getWidth();
+            int height = (int) image.getHeight();
+            WritableImage writableImage = new WritableImage(width, height);
+            PixelWriter pixelWriter = writableImage.getPixelWriter();
+
+            Enumeration<Integer> keys = disjointSets.keys();
+            while (keys.hasMoreElements()) {
+                int key = keys.nextElement();
+                List<Integer> pixelSet = disjointSets.get(key);
+                int setSize = pixelSet.size();
+                if (setSize < noiseValue) {
+                    for (int pixel : pixelSet) {
+                        imageArray[pixel] = -1;
+                    }
+                    //disjointSets.remove(key);
 
                 }
             }
+            for (int i = 0; i < imageArray.length; i++) {
+                if (imageArray[i] == -1) {
+                    int x = i % width;
+                    int y = i / width;
+                    Color newColor = Color.hsb(0, 0, 0.0);
+                    pixelWriter.setColor(x, y, newColor);
+                }
+            }
+            initImage.setImage(writableImage);
+            numOfPlants.setText(String.valueOf((disjointSets.size())));
+        } else {
+            System.out.println("Hi");
         }
-        initImage.setImage(writableImage);
-
-
-        //imageArray[disjointSets.get(key).get(0)] = -1;
-        // Print the resulting disjoint sets
-        // System.out.println(disjointSets);
-        // System.out.println(roots.toString());
-        numOfPlants.setText(String.valueOf((disjointSets.size())));
-
-        // colourPlants();
-    }
-
-    public void colourPlants() {
-        int height = (int) image.getHeight();
-        int width = (int) image.getWidth();
-
-
-        List<Integer> temp = disjointSets.get(find(imageArray, 34327));
-
     }
 
     public void printArray() {
-        createDisjointSets();
-        for (int i = 0; i < imageArray.length; i++) {
-            System.out.print(find(imageArray, i) + ((i + 1) % image.getWidth() == 0 ? "\n" : " "));
+        // createDisjointSets();
+        if (changeImage.isSelected()) {
+            for (int i = 0; i < imageArray.length; i++) {
+                System.out.print(find(imageArray, i) + ((i + 1) % image.getWidth() == 0 ? "\n" : " "));
+            }
+        } else {
+            System.out.println("Hi");
+        }
+    }
+
+    public void colourDisjointSets() {
+        if (changeImage.isSelected()) {
+            int width = (int) image.getWidth();
+            int height = (int) image.getHeight();
+            WritableImage writableImage = new WritableImage(width, height);
+            PixelWriter pixelWriter = writableImage.getPixelWriter();
+
+            Enumeration<Integer> keys = disjointSets.keys();
+            while (keys.hasMoreElements()) {
+                Color newColor = Color.rgb((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
+                int key = keys.nextElement();
+                List<Integer> pixelSet = disjointSets.get(key);
+                for (int pixel : pixelSet) {
+                    int x = pixel % width;
+                    int y = pixel / width;
+                    pixelWriter.setColor(x, y, newColor);
+                }
+            }
+            Color blackColor = Color.BLACK;
+            for (int i = 0; i < imageArray.length; i++) {
+                if (imageArray[i] == -1) {
+                    int x = i % width;
+                    int y = i / width;
+                    pixelWriter.setColor(x, y, blackColor);
+                }
+            }
+
+            image = writableImage;
+            initImage.setImage(image);
         }
     }
 }
