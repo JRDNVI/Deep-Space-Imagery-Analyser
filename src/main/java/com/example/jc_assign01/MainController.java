@@ -1,9 +1,11 @@
 package com.example.jc_assign01;
 
-import javafx.scene.Node;
+import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
@@ -13,6 +15,7 @@ import java.util.*;
 public class MainController {
 
     // Menu Tab
+    public AnchorPane anchorPane;
     public TabPane tabPane = new TabPane();
     public Tab menu;
     public MenuBar menuBar;
@@ -23,7 +26,12 @@ public class MainController {
     public MenuItem reduceNoise;
     public MenuItem printArray;
     public MenuItem colourSets;
+    public MenuItem circleSets;
+    public TabPane tabPane2;
+    public Tab firstImage;
+    public Tab secondImage;
     public ImageView initImage;
+    public ImageView alteredImage;
     public ListView<Object> imageInfo = new ListView<>();
     public CheckMenuItem changeImage;
 
@@ -36,12 +44,17 @@ public class MainController {
     public Button printArr;
     public Button resetNoise;
 
+
     public int[] imageArray;
     public Hashtable<Integer, List<Integer>> disjointSets = new Hashtable<Integer, List<Integer>>();
     public ArrayList<Integer> roots = new ArrayList<>();
+    private Group circleGroup = new Group();
     public Text numOfPlants;
 
-    Tooltip tooltip = new Tooltip();
+
+    public int sumX = 0;
+    public int sumY = 0;
+    public boolean overlay = false;
 
     public void fileChooser() {
         FileChooser fileChooser = new FileChooser();
@@ -52,7 +65,8 @@ public class MainController {
         image = new Image(file.toURI().toString(), 512, 512, false, false);
         initImage.setImage(image);
         imageInfo.getItems().addAll(fileName, fileSize, filePath);
-        Tooltip.install(initImage, tooltip);
+        luminanceValue = 0.5;
+        convertImage();
     }
 
     public void resetImageView() {
@@ -83,7 +97,6 @@ public class MainController {
     //    same number of index's in the array as the amount of pixels in the image. Then if the brightness of the pixel is 0.0 (Black)
     //    the value at the index the pixel is set to -1. else the value is set to its own index. UnionPixels is then called.
     public void convertImage() {
-        if (changeImage.isSelected()) {
             PixelReader pixelReader = image.getPixelReader();
             int width = (int) image.getWidth();
             int height = (int) image.getHeight();
@@ -104,12 +117,9 @@ public class MainController {
                     }
                     Color newColor = Color.hsb(0, 0, brightness);
                     pixelWriter.setColor(x, y, newColor);
-                    initImage.setImage(writableImage);
+                    alteredImage.setImage(writableImage);
                 }
             }
-        } else {
-            initImage.setImage(image);
-        }
         unionPixels();
     }
 
@@ -151,7 +161,6 @@ public class MainController {
     }
 
     public void removeNoiseAndKeys() {
-        if (changeImage.isSelected()) {
             int width = (int) image.getWidth();
             int height = (int) image.getHeight();
             WritableImage writableImage = new WritableImage(width, height);
@@ -162,12 +171,11 @@ public class MainController {
                 int key = keys.nextElement();
                 List<Integer> pixelSet = disjointSets.get(key);
                 int setSize = pixelSet.size();
-                if (setSize < noiseValue) {
+                if (setSize < noiseValue || setSize > 500) {
                     for (int pixel : pixelSet) {
                         imageArray[pixel] = -1;
                     }
                     disjointSets.remove(key);
-
                 }
             }
             for (int i = 0; i < imageArray.length; i++) {
@@ -178,11 +186,8 @@ public class MainController {
                     pixelWriter.setColor(x, y, newColor);
                 }
             }
-            initImage.setImage(writableImage);
+            alteredImage.setImage(writableImage);
             numOfPlants.setText(String.valueOf((disjointSets.size())));
-        } else {
-            System.out.println("Hi");
-        }
     }
 
     public void printArray() {
@@ -197,7 +202,6 @@ public class MainController {
     }
 
     public void colourDisjointSets() {
-        if (changeImage.isSelected()) {
             int width = (int) image.getWidth();
             int height = (int) image.getHeight();
             WritableImage writableImage = new WritableImage(width, height);
@@ -224,7 +228,54 @@ public class MainController {
             }
 
             image = writableImage;
-            initImage.setImage(image);
+            alteredImage.setImage(image);
+            getSizeOfSets();
+    }
+
+    public void getSizeOfSets() {
+        System.out.println("Total Objects Found: " + disjointSets.size());
+        Enumeration<Integer> keys = disjointSets.keys();
+        while (keys.hasMoreElements()) {
+            int key = keys.nextElement();
+            List<Integer> pixelSet = disjointSets.get(key);
+            System.out.println("Index: " + key + "   Pixel Size: " + pixelSet.size());
         }
+    }
+
+    public void circleObjects() {
+        if (!overlay) {
+            anchorPane.setOpacity(1);
+            int width = (int) image.getWidth();
+            Enumeration<Integer> keys = disjointSets.keys();
+            while (keys.hasMoreElements()) {
+                int key = keys.nextElement();
+                List<Integer> pixelSet = disjointSets.get(key);
+                int totalPixels = pixelSet.size();
+                for (Integer integer : pixelSet) {
+                    int x = integer % width;
+                    int y = integer / width;
+                    sumX += x;
+                    sumY += y;
+                }
+                double centerX = (double) sumX / totalPixels;
+                double centerY = (double) sumY / totalPixels;
+                Circle circle = new Circle();
+                circle.setCenterX(centerX);
+                circle.setCenterY(centerY);
+                circle.setFill(null); // Set the fill color to null
+                circle.setStroke(Color.BLUE); // Set the stroke color
+                circle.setStrokeWidth(2);
+                circle.setRadius(20);
+                circleGroup.getChildren().addAll(circle);
+                sumY = 0;
+                sumX = 0;
+            }
+            anchorPane.getChildren().add(circleGroup);
+            overlay = true;
+        } else {
+            anchorPane.getChildren().remove(circleGroup);
+            overlay = false;
+        }
+
     }
 }

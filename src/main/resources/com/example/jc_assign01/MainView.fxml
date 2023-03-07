@@ -21,8 +21,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="597.0" prefWidth="869.0">
                      <children>
-                        <ImageView fx:id="initImage" fitHeight="512.0" fitWidth="512.0" layoutX="14.0" layoutY="36.0" pickOnBounds="true" />
-                        <ListView fx:id="imageInfo" layoutX="14.0" layoutY="601.0" prefHeight="109.0" prefWidth="411.0" />
+                        <ListView fx:id="imageInfo" layoutX="582.0" layoutY="618.0" prefHeight="109.0" prefWidth="411.0" />
                         <MenuBar fx:id="menuBar" layoutY="2.0" prefHeight="25.0" prefWidth="1007.0">
                           <menus>
                             <Menu fx:id="file" mnemonicParsing="false" text="File">
@@ -37,17 +36,44 @@
                                     <MenuItem fx:id="printArray" mnemonicParsing="false" onAction="#printArray" text="Print ASCII" />
                                     <MenuItem fx:id="reduceNoise" mnemonicParsing="false" onAction="#removeNoiseAndKeys" text="Reduce Noise" />
                                     <MenuItem fx:id="colourSets" mnemonicParsing="false" onAction="#colourDisjointSets" text="Colour Planets" />
+                                    <CheckMenuItem fx:id="circleSets" mnemonicParsing="false" onAction="#circleObjects" text="Circle Objects" />
                                  </items>
                               </Menu>
                           </menus>
                         </MenuBar>
                         <Slider fx:id="luminanceSlider" layoutX="612.0" layoutY="413.0" max="1.0" onMouseDragged="#getLuminanceValue" prefHeight="14.0" prefWidth="285.0" showTickLabels="true" showTickMarks="true" />
                         <Button fx:id="printArr" layoutX="571.0" layoutY="502.0" mnemonicParsing="false" onAction="#printArray" text="print" />
-                        <Text fx:id="numOfPlants" layoutX="435.0" layoutY="614.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Total Plants:" wrappingWidth="83.13671875" />
+                        <Text fx:id="numOfPlants" layoutX="449.0" layoutY="623.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Total Planets:" wrappingWidth="83.13671875" />
                         <Slider fx:id="noiseReductionValue" layoutX="612.0" layoutY="332.0" max="50.0" onMouseDragged="#getNoiseValue" prefHeight="14.0" prefWidth="285.0" showTickLabels="true" showTickMarks="true" />
                         <Text layoutX="718.0" layoutY="328.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Reduce Noise" />
                         <Text layoutX="698.0" layoutY="409.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Luminance Threshold" />
                         <Button fx:id="resetNoise" layoutX="909.0" layoutY="320.0" mnemonicParsing="false" onAction="#convertImage" text="Rest Noise" />
+                        <TabPane fx:id="tabPane2" layoutY="27.0" prefHeight="573.0" prefWidth="513.0" tabClosingPolicy="UNAVAILABLE">
+                          <tabs>
+                            <Tab fx:id="firstImage" text="Original Image">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="516.0" prefWidth="544.0">
+                                       <children>
+                                          <AnchorPane fx:id="anchorPane" prefHeight="482.0" prefWidth="494.0">
+                                             <children>
+                                                <ImageView fx:id="initImage" fitHeight="515.0" fitWidth="513.0" pickOnBounds="true" preserveRatio="true" />
+                                             </children>
+                                          </AnchorPane>
+                                       </children>
+                                    </AnchorPane>
+                              </content>
+                            </Tab>
+                            <Tab fx:id="secondImage" text="Black &amp; White">
+                              <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <ImageView fx:id="alteredImage" fitHeight="512.0" fitWidth="515.0" layoutX="-2.0" pickOnBounds="true" />
+                                       </children>
+                                    </AnchorPane>
+                              </content>
+                            </Tab>
+                          </tabs>
+                        </TabPane>
                      </children>
                   </AnchorPane>
             </content>
