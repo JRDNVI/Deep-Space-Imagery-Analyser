@@ -1,5 +1,6 @@
 package com.example.jc_assign01;
 
+import javafx.event.ActionEvent;
 import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
@@ -33,6 +34,7 @@ public class MainController {
     public ImageView initImage;
     public ImageView alteredImage;
     public ListView<Object> imageInfo = new ListView<>();
+    public TreeView<String> celestialObjectsInfo;
     public CheckMenuItem changeImage;
 
     public Slider luminanceSlider;
@@ -48,8 +50,8 @@ public class MainController {
     public int[] imageArray;
     public Hashtable<Integer, List<Integer>> disjointSets = new Hashtable<Integer, List<Integer>>();
     public ArrayList<Integer> roots = new ArrayList<>();
-    private Group circleGroup = new Group();
-    public Text numOfPlants;
+    private final Group circleGroup = new Group();
+    private final Group objectIndexGroup = new Group();
 
 
     public int sumX = 0;
@@ -71,7 +73,9 @@ public class MainController {
 
     public void resetImageView() {
         initImage.setImage(null);
+        alteredImage.setImage(null);
         imageInfo.getItems().clear();
+        celestialObjectsInfo.setRoot(null);
     }
 
     public void getLuminanceValue() {
@@ -121,6 +125,7 @@ public class MainController {
                 }
             }
         unionPixels();
+        showTreeView();
     }
 
 
@@ -187,11 +192,10 @@ public class MainController {
                 }
             }
             alteredImage.setImage(writableImage);
-            numOfPlants.setText(String.valueOf((disjointSets.size())));
+            showTreeView();
     }
 
     public void printArray() {
-        // createDisjointSets();
         if (changeImage.isSelected()) {
             for (int i = 0; i < imageArray.length; i++) {
                 System.out.print(find(imageArray, i) + ((i + 1) % image.getWidth() == 0 ? "\n" : " "));
@@ -226,7 +230,6 @@ public class MainController {
                     pixelWriter.setColor(x, y, blackColor);
                 }
             }
-
             image = writableImage;
             alteredImage.setImage(image);
             getSizeOfSets();
@@ -244,6 +247,7 @@ public class MainController {
 
     public void circleObjects() {
         if (!overlay) {
+            int index = 1;
             anchorPane.setOpacity(1);
             int width = (int) image.getWidth();
             Enumeration<Integer> keys = disjointSets.keys();
@@ -260,22 +264,48 @@ public class MainController {
                 double centerX = (double) sumX / totalPixels;
                 double centerY = (double) sumY / totalPixels;
                 Circle circle = new Circle();
+                Text text = new Text();
+                text.setLayoutX(centerX);
+                text.setLayoutY(centerY);
+                text.setFill(Color.RED);
+                text.setText(String.valueOf(index));
                 circle.setCenterX(centerX);
                 circle.setCenterY(centerY);
-                circle.setFill(null); // Set the fill color to null
-                circle.setStroke(Color.BLUE); // Set the stroke color
+                circle.setFill(null);
+                circle.setStroke(Color.BLUE);
                 circle.setStrokeWidth(2);
                 circle.setRadius(20);
                 circleGroup.getChildren().addAll(circle);
+                objectIndexGroup.getChildren().addAll(text);
                 sumY = 0;
                 sumX = 0;
+                index++;
             }
-            anchorPane.getChildren().add(circleGroup);
+            anchorPane.getChildren().addAll(circleGroup, objectIndexGroup);
             overlay = true;
         } else {
-            anchorPane.getChildren().remove(circleGroup);
+            anchorPane.getChildren().removeAll(circleGroup, objectIndexGroup);
+            circleGroup.getChildren().clear();
+            objectIndexGroup.getChildren().clear();
             overlay = false;
         }
+    }
 
+    public void showTreeView() {
+        int index = 1;
+        TreeItem<String> topItem = new TreeItem<>("Number of Celestial Objects: " + disjointSets.size());
+        Enumeration<Integer> keys = disjointSets.keys();
+        while (keys.hasMoreElements()) {
+            int key = keys.nextElement();
+            List<Integer> pixelSet = disjointSets.get(key);
+            int totalPixels = pixelSet.size();
+            TreeItem<String> objects = new TreeItem<>("Celestial Object Number: " + index );
+            topItem.getChildren().add(objects);
+            TreeItem<String> objectInformation = new TreeItem<>(" Estimated Size (Pixel Units): " + totalPixels);
+            objects.getChildren().add(objectInformation);
+            index++;
+        }
+
+        celestialObjectsInfo.setRoot(topItem);
     }
 }
