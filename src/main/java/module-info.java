@@ -1,4 +1,4 @@
-module com.example.jc_assign01 {
+module com.example.jc_assign {
     requires javafx.controls;
     requires javafx.fxml;
 
